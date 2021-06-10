@@ -128,7 +128,7 @@ if(data){
       </header>
       <div className="">
         <header className="text-sm font-semibold text-gray-500 flex ml-10 mt-9 mr-10 pt-3 pb-3 border-t border-b grid grid-cols-12 gap-4">
-          <h4 className="col-start-2 col-end-5"><button onClick={()=>{
+          <h4 className="col-start-2 col-end-5 focus:outline-none"><button onClick={()=>{
             if (filter==="reverse"){
               setFilter("none")
             }else{setFilter("reverse")}
