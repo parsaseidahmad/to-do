@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { useState } from "react";
 import { MdClear } from "react-icons/md";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -23,9 +23,6 @@ export const CreateTask: React.FC<TCreateTodoProps> = ({
   );
   const [todoStatus, setTodoStatus] = useState<ToDo["status"]>(
     todo ? todo.status : "In progress"
-  );
-  const [todoIsDone, setTodoIsDone] = useState<boolean>(
-    todo ? todo.isDone : false
   );
 
   const add = () => {
@@ -68,6 +65,7 @@ export const CreateTask: React.FC<TCreateTodoProps> = ({
           onChange={(e) => {
             setTodoTitle(e.target.value);
           }}
+          value={todoTitle}
         ></input>
 
         <select
@@ -75,6 +73,7 @@ export const CreateTask: React.FC<TCreateTodoProps> = ({
           onChange={(e) => {
             setTodoStatus(e.target.value as any);
           }}
+          value={todoStatus}
         >
           <option value="Paused">Paused</option>
           <option value="In progress">In Progress</option>

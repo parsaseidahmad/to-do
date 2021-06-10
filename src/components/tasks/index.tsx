@@ -8,17 +8,16 @@ interface ToDoListItemProps {
   todo: ToDo;
   editTodo: any;
   deleteTodo: any;
+  isEdit : boolean;
 }
 
 export const ToDoListItem: React.FC<ToDoListItemProps> = ({
   todo,
   editTodo,
   deleteTodo,
+  isEdit=false,
 }) => {
   const [isOpen, setIsopen] = useState<boolean>(false);
-  const [todoStatus, setTodoStatus] = useState<ToDo["status"]>(
-    todo ? todo.status : "In progress"
-  );
   const getStatusColor = (status: ToDo["status"]) => {
     switch (status) {
       case "Paused":
@@ -31,11 +30,29 @@ export const ToDoListItem: React.FC<ToDoListItemProps> = ({
         return "bg-blue-500";
     }
   };
+  const [isChecked,setIsChecked]=useState<boolean>(todo.isDone);
+
+  const edit = (checked) => {
+    if (todo) {
+      const currentTodo: ToDo = {
+        id: todo.id,
+        status: checked? "In progress":"Done",
+        title: todo.title,
+        dueDate: todo.dueDate,
+        isDone: checked ? false : true,
+      };
+      editTodo(currentTodo);
+    }
+  };
   return (
     <li className="list-none">
       <div className="text-sm font-semibold text-gray-900 flex ml-10  mr-10 pt-8 pb-8  border-b grid grid-cols-12 gap-4">
         <span className="ml-2">
-          <input type="checkbox" checked={todoStatus === "Done"} />
+          
+        <input type="checkbox" onChange={()=> {
+          setIsChecked(prev=>!prev);
+          edit(isChecked);}
+      } checked={todo.isDone} />
         </span>
         <div className=" font-semibold text-xs col-start-2 col-end-5">
           {todo.title}
@@ -95,10 +112,14 @@ export const ToDoListItem: React.FC<ToDoListItemProps> = ({
     </li>
   );
 };
-export const TodoWrapper: FC<any> = ({ todos, setTodos, filter }) => {
+export const TodoWrapper: FC<any> = ({ todos, setTodos, filter }) => {console.log("",filter)
   const editTodo = (todo: ToDo) => {
-    const todoArr = [...todos].filter((t) => t.id !== todo.id);
-    todoArr.push(todo);
+    const todoArr = [...todos].map((t) =>{
+      if(t.id === todo.id){ 
+        t={...todo}
+      }
+      return t
+    } );
     setTodos(todoArr);
   };
   const deleteTodo = (todo: ToDo) => {
@@ -114,10 +135,13 @@ export const TodoWrapper: FC<any> = ({ todos, setTodos, filter }) => {
         );
       });
     }
-    if (filter === "week") {
+    if (filter === "week") { 
       return [...todos].filter((t: ToDo) => {
+        const todoWeek = Math.ceil(t.dueDate.getDate()/7)
+        const currentWeek = Math.ceil(new Date().getDate()/7)
+
         return (
-          t.dueDate.getMonth() === new Date().getMonth() &&
+          todoWeek===currentWeek &&
           t.dueDate.getMonth() === new Date().getMonth() &&
           t.dueDate.getFullYear() === new Date().getFullYear()
         );
@@ -126,7 +150,7 @@ export const TodoWrapper: FC<any> = ({ todos, setTodos, filter }) => {
     if (filter === "day") {
       return [...todos].filter((t: ToDo) => {
         return (
-          t.dueDate.getDay() === new Date().getDay() &&
+          t.dueDate.getDate() === new Date().getDate() &&
           t.dueDate.getMonth() === new Date().getMonth() &&
           t.dueDate.getFullYear() === new Date().getFullYear()
         );
@@ -137,13 +161,16 @@ export const TodoWrapper: FC<any> = ({ todos, setTodos, filter }) => {
         return t.isDone;
       });
     }
+    if (filter === "reverse") {
+      return [...todos].reverse()
+    }
     return todos;
   };
   return (
     <>
       {handleFilter().map((t: ToDo) => {
         return (
-          <ToDoListItem editTodo={editTodo} todo={t} deleteTodo={deleteTodo} />
+          <ToDoListItem editTodo={editTodo} todo={t} deleteTodo={deleteTodo} isEdit/>
         );
       })}
     </>

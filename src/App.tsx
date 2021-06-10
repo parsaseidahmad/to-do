@@ -1,4 +1,3 @@
-import logo from "./logo.svg";
 import "./App.css";
 import React, { useState } from "react";
 import { TodoWrapper } from "./components/tasks";
@@ -23,7 +22,7 @@ const todosInit: Array<ToDo> = [
   },
   {
     id: 2,
-    isDone: true,
+    isDone: false,
     title: "Task #3",
     dueDate: new Date(),
     status: "In progress",
@@ -32,9 +31,26 @@ const todosInit: Array<ToDo> = [
 
 const App: any = () => {
   const [todos, setTodos] = useState<Array<ToDo>>(todosInit);
+ React.useEffect(()=>{
+const data = localStorage.getItem("my-todo-list");
+if(data){
+  console.log(JSON.parse(data));
+  const dataAll = JSON.parse(data);
+  const validData = dataAll.map(d=>{
+
+    return {
+      ...d,dueDate:new Date(d.dueDate)
+    }
+  })
+    setTodos(validData);
+}
+ },[]);
+  React.useEffect(()=>{console.log("todos",todos)
+    localStorage.setItem("my-todo-list",JSON.stringify(todos))
+  },[todos]);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [filter, setFilter] =
-    useState<"week" | "month" | "day" | "none" | "isDone">("none");
+    useState<"week" | "month" | "day" | "none" | "isDone"|"reverse">("none");
 
   const addtodo = (todo: TTodoBasic) => {
     const nextId = todos.length;
@@ -87,7 +103,7 @@ const App: any = () => {
               onClick={() => {
                 setFilter("month");
               }}
-              className=" w-14 font-semibold rounded-l-xs bg-white hover:text-blue-500 focus:outline-none py-1 px-2  border-t border-b border-l "
+              className=" w-14 font-semibold rounded-l-xs bg-white focus:text-blue-600 hover:text-blue-500 focus:outline-none py-1 px-2  border-t border-b border-l "
             >
               Month
             </button>
@@ -95,7 +111,7 @@ const App: any = () => {
               onClick={() => {
                 setFilter("week");
               }}
-              className="w-14 font-semibold bg-white hover:text-blue-500 focus:outline-none py-1 px-2  border  "
+              className="w-14 font-semibold bg-white hover:text-blue-500 focus:text-blue-600 focus:outline-none py-1 px-2  border  "
             >
               Week
             </button>
@@ -103,7 +119,7 @@ const App: any = () => {
               onClick={() => {
                 setFilter("day");
               }}
-              className="w-14 font-semibold rounded-r-xs bg-white hover:text-blue-500 focus:outline-none py-1 px-2  border-t border-b border-r  "
+              className="w-14 font-semibold rounded-r-xs bg-white hover:text-blue-500 focus:text-blue-600 focus:outline-none py-1 px-2  border-t border-b border-r  "
             >
               Day
             </button>
@@ -112,7 +128,11 @@ const App: any = () => {
       </header>
       <div className="">
         <header className="text-sm font-semibold text-gray-500 flex ml-10 mt-9 mr-10 pt-3 pb-3 border-t border-b grid grid-cols-12 gap-4">
-          <h4 className="col-start-2 col-end-5">Tasks</h4>
+          <h4 className="col-start-2 col-end-5"><button onClick={()=>{
+            if (filter==="reverse"){
+              setFilter("none")
+            }else{setFilter("reverse")}
+            }}>Tasks</button></h4>
           <h4 className="col-start-5 col-end-6">Status</h4>
           <h4 className="col-start-7 col-end-8">Date</h4>
           <h4 className="col-start-9 col-end-10">Time</h4>
