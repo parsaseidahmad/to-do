@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, memo, useCallback, useMemo, useState } from "react";
 import { MdClear, MdModeEdit } from "react-icons/md";
 import { CreateTask } from "../createTask";
 import DatePicker from "react-datepicker";
@@ -11,7 +11,7 @@ interface ToDoListItemProps {
   isEdit: boolean;
 }
 
-export const ToDoListItem: React.FC<ToDoListItemProps> = ({
+export const ToDoListItem: React.FC<ToDoListItemProps> = memo(({
   todo,
   editTodo,
   deleteTodo,
@@ -114,7 +114,7 @@ export const ToDoListItem: React.FC<ToDoListItemProps> = ({
       </div>
     </li>
   );
-};
+});
 export const TodoWrapper: FC<any> = ({
   todos,
   setTodos,
@@ -122,7 +122,7 @@ export const TodoWrapper: FC<any> = ({
   sort,
   donePage,
 }) => {
-  const editTodo = (todo: ToDo) => {
+  const editTodo = useCallback((todo: ToDo) => {
     const todoArr = [...todos].map((t) => {
       if (t.id === todo.id) {
         t = { ...todo };
@@ -130,12 +130,12 @@ export const TodoWrapper: FC<any> = ({
       return t;
     });
     setTodos(todoArr);
-  };
-  const deleteTodo = (todo: ToDo) => {
+  },[setTodos, todos]);
+  const deleteTodo = useCallback((todo: ToDo) => {
     const todoArr = [...todos].filter((t) => t.id !== todo.id);
     setTodos(todoArr);
-  };
-  const handleDone = () => {
+  },[setTodos, todos]);
+  const doneFilter = useMemo(() => {
     if (donePage === "isDone") {
       return todos.filter((t: ToDo) => {
         return t.isDone;
@@ -147,8 +147,7 @@ export const TodoWrapper: FC<any> = ({
         return isnotDone;
       });
     }
-  };
-  const doneFilter = handleDone();
+  },[donePage, todos]);
   const getWeekDates = () => {
     const now = new Date();
     const dayOfWeek = now.getDay();
@@ -162,7 +161,7 @@ export const TodoWrapper: FC<any> = ({
 
     return [start, end];
   };
-  const handleFilter = () => {
+  const filtredTodos = useMemo(() => {
     if (filter === "month") {
       return doneFilter.filter((t: ToDo) => {
         return (
@@ -188,21 +187,21 @@ export const TodoWrapper: FC<any> = ({
     }
 
     return doneFilter;
-  };
+  },[doneFilter, filter]);
 
-  const filtredTodos = handleFilter();
-  const handleSort = () => {
+  const handleSort = useMemo(() => {
     if (sort === "reverse") {
       return filtredTodos.reverse();
     } else {
       return filtredTodos;
     }
-  };
+  },[filtredTodos, sort]);
   return (
     <>
-      {handleSort().map((t: ToDo) => {
+      {handleSort.map((t: ToDo) => {
         return (
           <ToDoListItem
+          
             editTodo={editTodo}
             todo={t}
             deleteTodo={deleteTodo}
