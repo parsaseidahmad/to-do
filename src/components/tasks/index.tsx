@@ -201,7 +201,7 @@ export const TodoWrapper: FC<any> = ({
       {handleSort.map((t: ToDo) => {
         return (
           <ToDoListItem
-          
+          key={`todoItem-${t.id}`}
             editTodo={editTodo}
             todo={t}
             deleteTodo={deleteTodo}
