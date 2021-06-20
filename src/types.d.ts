@@ -8,4 +8,3 @@ type TTodoBasic = {
   dueDate: Date;
   status: "Paused" | "In progress" | "Done";
 };
-
