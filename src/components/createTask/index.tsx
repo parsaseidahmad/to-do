@@ -30,7 +30,7 @@ export const CreateTask: React.FC<TCreateTodoProps> = ({
       status: todoStatus,
       title: todoTitle,
       dueDate: endDate,
-      isDone: false,
+      isDone: todoStatus === "Done" ? true : false,
     };
     addTodo(currentTodo);
   };
@@ -69,15 +69,21 @@ export const CreateTask: React.FC<TCreateTodoProps> = ({
         ></input>
 
         <select
-          className="block text-gray-400 focus:outline-none mt-2 mb-2"
+          className="block text-gray-400 focus:outline-none mt-2 mb-2 "
           onChange={(e) => {
             setTodoStatus(e.target.value as any);
           }}
           value={todoStatus}
         >
-          <option value="Paused">Paused</option>
-          <option value="In progress">In Progress</option>
-          <option value="Done">Done</option>
+          <option value="Paused" className="text-yellow-500">
+            Paused
+          </option>
+          <option value="In progress" className="text-blue-500">
+            In Progress
+          </option>
+          <option value="Done" className="text-green-500">
+            Done
+          </option>
         </select>
         <span className="block focus:outline-none ml-1">
           <span className="col-start-7 col-end-8 font-semibold text-xs">

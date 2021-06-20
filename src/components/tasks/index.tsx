@@ -8,14 +8,14 @@ interface ToDoListItemProps {
   todo: ToDo;
   editTodo: any;
   deleteTodo: any;
-  isEdit : boolean;
+  isEdit: boolean;
 }
 
 export const ToDoListItem: React.FC<ToDoListItemProps> = ({
   todo,
   editTodo,
   deleteTodo,
-  isEdit=false,
+  isEdit = false,
 }) => {
   const [isOpen, setIsopen] = useState<boolean>(false);
   const getStatusColor = (status: ToDo["status"]) => {
@@ -30,13 +30,13 @@ export const ToDoListItem: React.FC<ToDoListItemProps> = ({
         return "bg-blue-500";
     }
   };
-  const [isChecked,setIsChecked]=useState<boolean>(todo.isDone);
+  const [isChecked, setIsChecked] = useState<boolean>(todo.isDone);
 
   const edit = (checked) => {
     if (todo) {
       const currentTodo: ToDo = {
         id: todo.id,
-        status: checked? "In progress":"Done",
+        status: checked ? "In progress" : "Done",
         title: todo.title,
         dueDate: todo.dueDate,
         isDone: checked ? false : true,
@@ -48,11 +48,14 @@ export const ToDoListItem: React.FC<ToDoListItemProps> = ({
     <li className="list-none">
       <div className="text-sm font-semibold text-gray-900 flex ml-10  mr-10 pt-8 pb-8  border-b grid grid-cols-12 gap-4">
         <span className="ml-2">
-          
-        <input type="checkbox" onChange={()=> {
-          setIsChecked(prev=>!prev);
-          edit(isChecked);}
-      } checked={todo.isDone} />
+          <input
+            type="checkbox"
+            onChange={() => {
+              setIsChecked((prev) => !prev);
+              edit(isChecked);
+            }}
+            checked={todo.isDone}
+          />
         </span>
         <div className=" font-semibold text-xs col-start-2 col-end-5">
           {todo.title}
@@ -112,43 +115,70 @@ export const ToDoListItem: React.FC<ToDoListItemProps> = ({
     </li>
   );
 };
-export const TodoWrapper: FC<any> = ({ todos, setTodos, filter }) => {console.log("",filter)
+export const TodoWrapper: FC<any> = ({
+  todos,
+  setTodos,
+  filter,
+  sort,
+  donePage,
+}) => {
   const editTodo = (todo: ToDo) => {
-    const todoArr = [...todos].map((t) =>{
-      if(t.id === todo.id){ 
-        t={...todo}
+    const todoArr = [...todos].map((t) => {
+      if (t.id === todo.id) {
+        t = { ...todo };
       }
-      return t
-    } );
+      return t;
+    });
     setTodos(todoArr);
   };
   const deleteTodo = (todo: ToDo) => {
     const todoArr = [...todos].filter((t) => t.id !== todo.id);
     setTodos(todoArr);
   };
+  const handleDone = () => {
+    if (donePage === "isDone") {
+      return todos.filter((t: ToDo) => {
+        return t.isDone;
+      });
+    }
+    if (donePage === "isNotDone") {
+      return todos.filter((t: ToDo) => {
+        const isnotDone: boolean = !t.isDone;
+        return isnotDone;
+      });
+    }
+  };
+  const doneFilter = handleDone();
+  const getWeekDates = () => {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const dayNumber = now.getDate();
+
+    const start = new Date(now);
+    start.setDate(dayNumber - dayOfWeek);
+
+    const end = new Date(now);
+    end.setDate(dayNumber + (7 - dayOfWeek));
+
+    return [start, end];
+  };
   const handleFilter = () => {
     if (filter === "month") {
-      return [...todos].filter((t: ToDo) => {
+      return doneFilter.filter((t: ToDo) => {
         return (
           t.dueDate.getMonth() === new Date().getMonth() &&
           t.dueDate.getFullYear() === new Date().getFullYear()
         );
       });
     }
-    if (filter === "week") { 
-      return [...todos].filter((t: ToDo) => {
-        const todoWeek = Math.ceil(t.dueDate.getDate()/7)
-        const currentWeek = Math.ceil(new Date().getDate()/7)
-
-        return (
-          todoWeek===currentWeek &&
-          t.dueDate.getMonth() === new Date().getMonth() &&
-          t.dueDate.getFullYear() === new Date().getFullYear()
-        );
+    if (filter === "week") {
+      return doneFilter.filter((t: ToDo) => {
+        const [start, end] = getWeekDates();
+        return +t.dueDate >= +start && +t.dueDate <= +end;
       });
     }
     if (filter === "day") {
-      return [...todos].filter((t: ToDo) => {
+      return doneFilter.filter((t: ToDo) => {
         return (
           t.dueDate.getDate() === new Date().getDate() &&
           t.dueDate.getMonth() === new Date().getMonth() &&
@@ -156,21 +186,28 @@ export const TodoWrapper: FC<any> = ({ todos, setTodos, filter }) => {console.lo
         );
       });
     }
-    if (filter === "isDone") {
-      return [...todos].filter((t: ToDo) => {
-        return t.isDone;
-      });
+
+    return doneFilter;
+  };
+
+  const filtredTodos = handleFilter();
+  const handleSort = () => {
+    if (sort === "reverse") {
+      return filtredTodos.reverse();
+    } else {
+      return filtredTodos;
     }
-    if (filter === "reverse") {
-      return [...todos].reverse()
-    }
-    return todos;
   };
   return (
     <>
-      {handleFilter().map((t: ToDo) => {
+      {handleSort().map((t: ToDo) => {
         return (
-          <ToDoListItem editTodo={editTodo} todo={t} deleteTodo={deleteTodo} isEdit/>
+          <ToDoListItem
+            editTodo={editTodo}
+            todo={t}
+            deleteTodo={deleteTodo}
+            isEdit
+          />
         );
       })}
     </>

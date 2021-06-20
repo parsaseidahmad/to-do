@@ -1,5 +1,5 @@
 import "./App.css";
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import { TodoWrapper } from "./components/tasks";
 import "tailwindcss/tailwind.css";
 import { CreateTask } from "./components/createTask";
@@ -31,26 +31,26 @@ const todosInit: Array<ToDo> = [
 
 const App: any = () => {
   const [todos, setTodos] = useState<Array<ToDo>>(todosInit);
- React.useEffect(()=>{
-const data = localStorage.getItem("my-todo-list");
-if(data){
-  console.log(JSON.parse(data));
-  const dataAll = JSON.parse(data);
-  const validData = dataAll.map(d=>{
-
-    return {
-      ...d,dueDate:new Date(d.dueDate)
+  React.useEffect(() => {
+    const data = localStorage.getItem("my-todo-list");
+    if (data) {
+      const dataAll = JSON.parse(data);
+      const validData = dataAll.map((d) => {
+        return {
+          ...d,
+          dueDate: new Date(d.dueDate),
+        };
+      });
+      setTodos(validData);
     }
-  })
-    setTodos(validData);
-}
- },[]);
-  React.useEffect(()=>{console.log("todos",todos)
-    localStorage.setItem("my-todo-list",JSON.stringify(todos))
-  },[todos]);
+  }, []);
+  React.useEffect(() => {
+    localStorage.setItem("my-todo-list", JSON.stringify(todos));
+  }, [todos]);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [filter, setFilter] =
-    useState<"week" | "month" | "day" | "none" | "isDone"|"reverse">("none");
+  const [filter, setFilter] = useState<"week" | "month" | "day">("day");
+  const [sort, setSort] = useState<"reverse" | "none">("none");
+  const [donePage, setDonePage] = useState<"isDone" | "isNotDone">("isNotDone");
 
   const addtodo = (todo: TTodoBasic) => {
     const nextId = todos.length;
@@ -82,7 +82,7 @@ if(data){
         <div className="text-xss  ml-10 mr-10 block border-b mt-3 mb-5  text-gray-500">
           <button
             onClick={() => {
-              setFilter("none");
+              setDonePage("isNotDone");
             }}
             className="font-bold w-24 h-8 rounded-sm bg-white hover:text-blue-500 focus:outline-none py-1 px-2  border-t border-r border-l focus:text-blue-500   "
           >
@@ -90,7 +90,7 @@ if(data){
           </button>
           <button
             onClick={() => {
-              setFilter("isDone");
+              setDonePage("isDone");
             }}
             className="font-bold w-24 h-8 rounded-sm bg-white hover:text-blue-500 focus:outline-none py-1 px-2  border-t border-r border-l focus:text-blue-500 ml-1"
           >
@@ -128,11 +128,20 @@ if(data){
       </header>
       <div className="">
         <header className="text-sm font-semibold text-gray-500 flex ml-10 mt-9 mr-10 pt-3 pb-3 border-t border-b grid grid-cols-12 gap-4">
-          <h4 className="col-start-2 col-end-5 focus:outline-none"><button onClick={()=>{
-            if (filter==="reverse"){
-              setFilter("none")
-            }else{setFilter("reverse")}
-            }}>Tasks</button></h4>
+          <h4 className="col-start-2 col-end-5 ">
+            <button
+              className="font-semibold hover:text-gray-700  focus:outline-none"
+              onClick={() => {
+                if (sort === "reverse") {
+                  setSort("none");
+                } else {
+                  setSort("reverse");
+                }
+              }}
+            >
+              Tasks
+            </button>
+          </h4>
           <h4 className="col-start-5 col-end-6">Status</h4>
           <h4 className="col-start-7 col-end-8">Date</h4>
           <h4 className="col-start-9 col-end-10">Time</h4>
@@ -141,10 +150,12 @@ if(data){
           filter={filter}
           todos={todos}
           setTodos={setTodos}
+          sort={sort}
+          donePage={donePage}
         ></TodoWrapper>
       </div>
     </>
   );
 };
 
-export default App;
+export default memo(App);
